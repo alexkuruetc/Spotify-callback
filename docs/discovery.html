@@ -294,9 +294,15 @@ window.addEventListener("load", () => {
     if (error) { showError("Spotify declined: " + error); return; }
     const savedVerifier = localStorage.getItem("spotify_verifier");
     const savedState = localStorage.getItem("spotify_state");
+    // Debug: show what we got
+    const debugMsg = "code=" + (code ? code.slice(0,8)+"..." : "MISSING")
+      + " | verifier=" + (savedVerifier ? savedVerifier.slice(0,8)+"..." : "MISSING")
+      + " | state_match=" + (state === savedState ? "YES" : "NO");
+    showView("exchanging");
+    document.getElementById("view-exchanging").innerHTML += '<div style="color:#888;font-size:10px;margin-top:12px;word-break:break-all">' + debugMsg + '</div>';
     localStorage.removeItem("spotify_verifier");
     localStorage.removeItem("spotify_state");
-    if (!savedVerifier) { showError("Session expired — please tap Connect again."); return; }
+    if (!savedVerifier) { showError("Session expired — verifier missing from localStorage. Please tap Connect again."); return; }
     if (state && savedState && state !== savedState) { showError("State mismatch — please tap Connect again."); return; }
     codeVerifier = savedVerifier;
     doExchange(code);
