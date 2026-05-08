@@ -284,20 +284,20 @@ function showView(name) {
 // ── On load: check if returning from Spotify callback ───────────────────────
 window.addEventListener("load", () => {
   const params = new URLSearchParams(window.location.search);
-  if (params.get("spotifycallback") === "1") {
-    const code = params.get("code");
-    const state = params.get("state") || "";
-    const error = params.get("error");
+  const code = params.get("code");
+  const state = params.get("state") || "";
+  const error = params.get("error");
+
+  if (code || error) {
+    // Returning from Spotify redirect
     window.history.replaceState({}, "", window.location.pathname);
     if (error) { showError("Spotify declined: " + error); return; }
-    if (!code) { showError("No auth code received."); return; }
-    // Read verifier and state from localStorage — written before the redirect
     const savedVerifier = localStorage.getItem("spotify_verifier");
     const savedState = localStorage.getItem("spotify_state");
     localStorage.removeItem("spotify_verifier");
     localStorage.removeItem("spotify_state");
-    if (!savedVerifier) { showError("Session expired — please try connecting again."); return; }
-    if (state && savedState && state !== savedState) { showError("State mismatch — please try again."); return; }
+    if (!savedVerifier) { showError("Session expired — please tap Connect again."); return; }
+    if (state && savedState && state !== savedState) { showError("State mismatch — please tap Connect again."); return; }
     codeVerifier = savedVerifier;
     doExchange(code);
   } else {
