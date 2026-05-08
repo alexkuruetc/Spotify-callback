@@ -2,17 +2,15 @@
 <html>
 <head><title>Spotify Auth</title></head>
 <body>
-<p style="font-family:monospace;padding:20px">Authorised ✓ You can close this tab and return to Claude.</p>
+<p style="font-family:monospace;padding:20px">Connecting... returning to Claude.</p>
 <script>
-  const url = window.location.href;
-  // Try postMessage to opener
-  if (window.opener) {
-    try { window.opener.postMessage(url, "*"); } catch(e) {}
+  const params = window.location.search;
+  const returnTo = sessionStorage.getItem("spotify_return_url");
+  if (returnTo) {
+    window.location.replace(returnTo + "?spotifycallback=1" + "&" + params.slice(1));
+  } else {
+    document.querySelector("p").textContent = "Error: no return URL found. Please go back to Claude and try again.";
   }
-  // Also write to localStorage as fallback
-  try { localStorage.setItem("spotify_callback_url", url); } catch(e) {}
-  setTimeout(() => window.close(), 2000);
 </script>
 </body>
 </html>
-
