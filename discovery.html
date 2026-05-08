@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>\m/ Discovery</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --green:#1db954;--green2:#1ed760;--bg:#0d0d0d;--card:rgba(255,255,255,0.025);
+    --border:rgba(255,255,255,0.07);--text:#e8e8e8;--muted:#555;--dim:#2a2a2a;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh}
+  ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#1a1a1a}
+  .glow{position:fixed;top:-10%;left:50%;transform:translateX(-50%);width:600px;height:300px;
+    background:radial-gradient(ellipse,rgba(29,185,84,0.05) 0%,transparent 70%);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:660px;margin:0 auto;padding:40px 20px 80px}
+  .logo{font-family:'Bebas Neue',cursive;font-size:clamp(38px,7vw,62px);letter-spacing:-0.02em;line-height:1;margin-bottom:6px}
+  .logo span{color:var(--green)}
+  .sub{color:#333;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:44px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:22px;margin-bottom:14px}
+  .card-green{border-color:rgba(29,185,84,0.15)}
+  .card-red{border-color:rgba(255,80,80,0.15)}
+  .lbl{display:block;color:#444;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:8px}
+  input,textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);
+    border-radius:4px;padding:11px 14px;color:var(--text);font-family:'DM Mono',monospace;
+    font-size:12px;outline:none;box-sizing:border-box}
+  input:focus,textarea:focus{border-color:rgba(29,185,84,0.4)}
+  textarea{resize:none;min-height:80px;font-size:11px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:var(--green);
+    color:#000;border:none;border-radius:4px;font-size:11px;font-family:'DM Mono',monospace;
+    font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:filter 0.15s}
+  .btn:hover{filter:brightness(1.12)}
+  .btn:disabled{opacity:0.5;cursor:not-allowed}
+  .btn-ghost{background:transparent;border:1px solid rgba(29,185,84,0.3);color:var(--green)}
+  .btn-danger{background:transparent;border:1px solid rgba(255,80,80,0.25);color:#ff5555}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .progress-wrap{margin-bottom:16px}
+  .progress-hd{display:flex;justify-content:space-between;margin-bottom:5px}
+  .progress-lbl{color:#666;font-size:11px;text-transform:uppercase;letter-spacing:0.1em}
+  .progress-pct{color:var(--green);font-size:11px}
+  .progress-bar{height:2px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green2));
+    transition:width 0.4s ease;box-shadow:0 0 10px rgba(29,185,84,0.5)}
+  .tabs{display:flex;gap:6px;margin-bottom:10px}
+  .tab{padding:6px 14px;background:transparent;border:1px solid rgba(255,255,255,0.05);
+    border-radius:3px;color:#444;font-family:'DM Mono',monospace;font-size:10px;
+    letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+  .tab.active{background:rgba(29,185,84,0.1);border-color:rgba(29,185,84,0.3);color:var(--green)}
+  .scroll-box{max-height:420px;overflow-y:auto;margin-top:12px}
+  .track-row{display:flex;gap:10px;align-items:center;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .track-row-disc{display:flex;gap:10px;align-items:flex-start;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .track-num{color:#222;font-size:10px;min-width:24px;flex-shrink:0}
+  .track-name{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:0.04em;color:#e0e0e0}
+  .track-artist{color:#555;font-size:10px;margin-bottom:4px}
+  .track-year{color:#222;font-size:10px;flex-shrink:0}
+  .chip{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;
+    letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;flex-shrink:0}
+  .chip-reason{color:#2e2e2e;font-size:10px}
+  .cat-grid{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .cat-card{flex:1;min-width:100px;padding:12px 14px;text-align:center}
+  .cat-num{font-family:'Bebas Neue',cursive;font-size:22px}
+  .cat-lbl{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#333;margin-top:2px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:8px}
+  .step-row{display:flex;align-items:flex-start;margin-bottom:18px}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+    border-radius:50%;background:rgba(29,185,84,0.15);border:1px solid rgba(29,185,84,0.3);
+    color:var(--green);font-size:11px;font-weight:700;flex-shrink:0;margin-right:12px;margin-top:1px}
+  .blink{animation:blink 1.5s ease-in-out infinite}
+  .error-box{color:#ff5555;font-size:11px;padding:10px 12px;background:rgba(255,80,80,0.05);
+    border:1px solid rgba(255,80,80,0.15);border-radius:4px;margin-bottom:14px}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fade-in{animation:fadeUp 0.25s ease forwards;opacity:0}
+  .hidden{display:none!important}
+  .vibe{color:#888;font-size:12px;font-style:italic;line-height:1.5}
+  .genre-chips{margin-top:4px}
+  .flex-row{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+  .big-num{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:0.04em}
+  .hint{color:var(--dim);font-size:10px;margin-top:6px}
+  .done-emoji{font-size:26px;margin-bottom:10px}
+  .done-title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:0.04em;margin-bottom:6px}
+  .done-sub{color:#333;font-size:11px;margin-bottom:22px}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <div class="logo"><span>\m/</span> DISCOVERY</div>
+  <div class="sub">Spotify · Playlist Intelligence · Claude AI</div>
+
+  <div id="view-idle" class="card">
+    <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:0.05em;color:#ccc;margin-bottom:10px">Connect your Spotify account</div>
+    <div style="color:#444;font-size:11px;line-height:1.8;margin-bottom:20px">Tap below to begin. You'll be taken to Spotify to log in, then brought straight back.</div>
+    <button class="btn" onclick="buildAuthUrl()">▶ Connect Spotify</button>
+  </div>
+
+  <div id="view-exchanging" class="card hidden">
+    <div class="blink" style="color:var(--green);font-size:11px">◉ Connecting to Spotify...</div>
+  </div>
+
+  <div id="view-home" class="hidden">
+    <div class="card card-green" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+        <span class="dot"></span>
+        <span style="color:var(--green);font-size:10px;letter-spacing:0.12em">SPOTIFY CONNECTED</span>
+      </div>
+      <label class="lbl">Playlist URL or ID</label>
+      <input id="playlist-url" type="text" value="https://open.spotify.com/playlist/53cq9nPEapUIgWgYTsa7Uo" placeholder="https://open.spotify.com/playlist/...">
+      <div class="hint">Paste any playlist URL — reusable for all your playlists</div>
+    </div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn" onclick="handleRun()">▶ Analyse &amp; Generate</button>
+      <button class="btn btn-ghost" onclick="disconnect()">Disconnect</button>
+    </div>
+  </div>
+
+  <div id="view-fetching" class="card hidden">
+    <div class="blink" style="color:#444;font-size:11px;margin-bottom:20px">◉ Fetching playlist from Spotify...</div>
+    <div class="progress-wrap">
+      <div class="progress-hd"><span class="progress-lbl">Loading tracks</span><span class="progress-pct" id="fetch-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="fetch-bar" style="width:0%"></div></div>
+    </div>
+    <div id="fetch-count" style="color:#2a2a2a;font-size:10px"></div>
+  </div>
+
+  <div id="view-analysing" class="card hidden">
+    <div class="blink" style="color:#444;font-size:11px;margin-bottom:20px">◉ Claude is analysing your taste...</div>
+    <div class="progress-wrap">
+      <div class="progress-hd"><span class="progress-lbl">Tracks fetched</span><span class="progress-pct">100%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-hd"><span class="progress-lbl">Generating recommendations</span><span class="progress-pct" id="analyse-pct">10%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="analyse-bar" style="width:10%"></div></div>
+    </div>
+    <div id="analyse-hint" style="color:#222;font-size:10px;margin-top:10px"></div>
+  </div>
+
+  <div id="view-preview" class="hidden">
+    <div class="card">
+      <div class="flex-row">
+        <div>
+          <div class="lbl">Playlist</div>
+          <div class="big-num" id="preview-name"></div>
+          <div style="color:#333;font-size:10px;margin-top:2px" id="preview-count"></div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <div class="lbl">Vibe</div>
+          <div class="vibe" id="preview-mood"></div>
+        </div>
+      </div>
+      <div class="lbl">Genres</div>
+      <div class="genre-chips" id="preview-genres"></div>
+    </div>
+    <div class="cat-grid" id="cat-grid"></div>
+    <div class="tabs">
+      <button class="tab active" id="tab-disc" onclick="switchTab('discovery')">Discovery</button>
+      <button class="tab" id="tab-src" onclick="switchTab('source')">Source</button>
+    </div>
+    <div class="scroll-box" id="track-list"></div>
+    <div class="btn-row" style="margin-top:24px">
+      <button class="btn" id="create-btn" onclick="handleCreate()">✦ Create Discovery Playlist</button>
+      <button class="btn btn-ghost" onclick="resetToHome()">← Different Playlist</button>
+    </div>
+  </div>
+
+  <div id="view-creating" class="card hidden">
+    <div class="blink" style="color:#444;font-size:11px;margin-bottom:20px">◉ Building your playlist on Spotify...</div>
+    <div class="progress-wrap">
+      <div class="progress-hd"><span class="progress-lbl">Resolving &amp; adding tracks</span><span class="progress-pct" id="create-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="create-bar" style="width:0%"></div></div>
+    </div>
+    <div style="color:#222;font-size:10px;margin-top:10px">Searching Spotify for each track · ~30 seconds</div>
+  </div>
+
+  <div id="view-done" class="card hidden">
+    <div class="done-emoji">🤘</div>
+    <div class="done-title"><span style="color:var(--green)" id="done-name"></span> is in your library</div>
+    <div class="done-sub">Saved as a private playlist · open Spotify to find it</div>
+    <div class="btn-row" style="margin-top:0">
+      <a class="btn" id="done-link" href="#" target="_blank">Open in Spotify ↗</a>
+      <button class="btn btn-ghost" onclick="resetToHome()">← Do Another Playlist</button>
+    </div>
+  </div>
+
+  <div id="view-error" class="card card-red hidden">
+    <div id="error-msg" style="color:#ff5555;font-size:12px;margin-bottom:10px"></div>
+    <div style="color:#333;font-size:11px;margin-bottom:20px;line-height:1.7">If this is an auth error, reconnect Spotify. Tokens expire after 1 hour.</div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn btn-ghost" onclick="resetToHome()">← Back</button>
+      <button class="btn btn-danger" onclick="disconnect()">Reconnect Spotify</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CLIENT_ID = "8e569fd4f15f4533b93c03fe1afc02a8";
+const REDIRECT_URI = "https://alexkuruetc.github.io/Spotify-callback/";
+const SCOPES = "playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public";
+
+let accessToken = null;
+let codeVerifier = null;
+let sourceTracks = [];
+let discTracks = [];
+let playlistName = "";
+let activeTab = "discovery";
+let analysisData = null;
+
+const CAT_COLORS = { new_artist: "#1db954", new_release: "#ff6b35", classic_fit: "#a78bfa" };
+const CAT_LABELS = { new_artist: "NEW ARTIST", new_release: "NEW RELEASE", classic_fit: "CLASSIC FIT" };
+
+const VIEWS = ["idle","exchanging","home","fetching","analysing","preview","creating","done","error"];
+function showView(name) {
+  VIEWS.forEach(v => {
+    const el = document.getElementById("view-" + v);
+    if (el) el.classList.toggle("hidden", v !== name);
+  });
+}
+
+window.addEventListener("load", () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("spotifycallback") === "1") {
+    const code = params.get("code");
+    const state = params.get("state");
+    const error = params.get("error");
+    const savedState = sessionStorage.getItem("spotify_state");
+    const verifier = sessionStorage.getItem("spotify_verifier");
+    sessionStorage.removeItem("spotify_state");
+    sessionStorage.removeItem("spotify_verifier");
+    window.history.replaceState({}, "", window.location.pathname);
+    if (error) { showError("Spotify declined: " + error); return; }
+    if (!code) { showError("No auth code received."); return; }
+    if (state !== savedState) { showError("State mismatch — please try again."); return; }
+    codeVerifier = verifier;
+    doExchange(code);
+  } else {
+    showView("idle");
+  }
+});
+
+function generateVerifier(len = 128) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const arr = new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, b => chars[b % chars.length]).join("");
+}
+
+async function generateChallenge(verifier) {
+  const enc = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest("SHA-256", enc);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+
+async function buildAuthUrl() {
+  const verifier = generateVerifier();
+  codeVerifier = verifier;
+  const challenge = await generateChallenge(verifier);
+  const state = crypto.randomUUID();
+  sessionStorage.setItem("spotify_verifier", verifier);
+  sessionStorage.setItem("spotify_state", state);
+  sessionStorage.setItem("spotify_return_url", window.location.href.split("?")[0]);
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID, response_type: "code",
+    redirect_uri: REDIRECT_URI, code_challenge_method: "S256",
+    code_challenge: challenge, state, scope: SCOPES,
+  });
+  window.location.href = `https://accounts.spotify.com/authorize?${params}`;
+}
+
+async function doExchange(code) {
+  showView("exchanging");
+  try {
+    const body = new URLSearchParams({
+      client_id: CLIENT_ID, grant_type: "authorization_code",
+      code, redirect_uri: REDIRECT_URI, code_verifier: codeVerifier,
+    });
+    const res = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body,
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      accessToken = data.access_token;
+      showView("home");
+    } else {
+      throw new Error(data.error_description || "Token exchange failed — please try again.");
+    }
+  } catch(e) {
+    showError(e.message);
+  }
+}
+
+function disconnect() {
+  accessToken = null; sourceTracks = []; discTracks = []; playlistName = "";
+  showView("idle");
+}
+
+async function sfetch(url, opts = {}) {
+  const res = await fetch(url, {
+    ...opts,
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json", ...(opts.headers||{}) },
+  });
+  if (!res.ok) {
+    const b = await res.json().catch(()=>({}));
+    throw new Error(b?.error?.message || `Spotify error ${res.status}`);
+  }
+  return res.json();
+}
+
+function setProgress(barId, pctId, pct) {
+  const b = document.getElementById(barId);
+  const p = document.getElementById(pctId);
+  if (b) b.style.width = pct + "%";
+  if (p) p.textContent = pct + "%";
+}
+
+function extractPlaylistId(input) {
+  const m = input.match(/playlist\/([a-zA-Z0-9]+)/);
+  if (m) return m[1];
+  if (/^[a-zA-Z0-9]+$/.test(input.trim())) return input.trim();
+  return null;
+}
+
+async function handleRun() {
+  const input = document.getElementById("playlist-url").value.trim();
+  const pid = extractPlaylistId(input);
+  if (!pid) { showError("Invalid playlist URL or ID."); return; }
+  sourceTracks = []; discTracks = []; analysisData = null;
+  showView("fetching");
+  setProgress("fetch-bar","fetch-pct",0);
+  try {
+    const meta = await sfetch(`https://api.spotify.com/v1/playlists/${pid}?fields=name`);
+    playlistName = meta.name;
+    let url = `https://api.spotify.com/v1/playlists/${pid}/tracks?limit=100&fields=next,items(track(id,name,artists,album(release_date)))`;
+    while (url) {
+      const data = await sfetch(url);
+      const valid = (data.items||[]).filter(i=>i.track?.id).map(i=>({
+        id: i.track.id, name: i.track.name,
+        artists: i.track.artists.map(a=>a.name).join(", "),
+        year: i.track.album?.release_date?.slice(0,4)||"?",
+      }));
+      sourceTracks = [...sourceTracks, ...valid];
+      url = data.next || null;
+      setProgress("fetch-bar","fetch-pct", Math.min(90, sourceTracks.length));
+      document.getElementById("fetch-count").textContent = sourceTracks.length + " tracks loaded";
+    }
+    setProgress("fetch-bar","fetch-pct",100);
+    showView("analysing");
+    setProgress("analyse-bar","analyse-pct",10);
+    document.getElementById("analyse-hint").textContent = sourceTracks.length + " tracks · detecting genres · finding new artists";
+    const artists = [...new Set(sourceTracks.map(t=>t.artists))].join(", ");
+    const sample = sourceTracks.slice(0,100).map(t=>`${t.name} — ${t.artists} (${t.year})`).join("\n");
+    const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514", max_tokens: 1000,
+        system: `You are a music expert specialising in metal, rock, and heavy music. Analyse a playlist and return ONLY raw JSON — no markdown fences, no preamble, no explanation.
+
+Schema (strict):
+{
+  "genres": string[],
+  "mood": string,
+  "topArtists": string[],
+  "recommendations": [{
+    "name": string,
+    "artist": string,
+    "year": number,
+    "reason": string (max 8 words),
+    "category": "new_artist" | "new_release" | "classic_fit"
+  }]
+}
+
+Recommendations: exactly 50 tracks.
+- ~30 new_artist: artists NOT on the source playlist, released 2020-2025
+- ~12 new_release: recent songs (2020-2025) from artists already on the playlist
+- ~8 classic_fit: older tracks/artists the listener would love
+Vary subgenres within heavy music. Be bold and specific — not obvious safe choices.`,
+        messages: [{ role: "user", content: `Playlist: "${playlistName}" (${sourceTracks.length} tracks)\nArtists: ${artists}\n\nSample:\n${sample}` }],
+      }),
+    });
+    setProgress("analyse-bar","analyse-pct",70);
+    const cd = await claudeRes.json();
+    const raw = cd.content?.find(b=>b.type==="text")?.text || "{}";
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,"").trim()); }
+    catch { throw new Error("Failed to parse Claude response — please try again."); }
+    analysisData = parsed;
+    discTracks = parsed.recommendations || [];
+    setProgress("analyse-bar","analyse-pct",100);
+    renderPreview();
+    showView("preview");
+  } catch(e) { showError(e.message); }
+}
+
+function renderPreview() {
+  document.getElementById("preview-name").textContent = playlistName;
+  document.getElementById("preview-count").textContent = sourceTracks.length + " tracks";
+  document.getElementById("preview-mood").textContent = analysisData.mood || "";
+  document.getElementById("create-btn").textContent = `✦ Create "${playlistName} Discovery"`;
+  document.getElementById("preview-genres").innerHTML = (analysisData.genres||[]).map(g =>
+    `<span class="chip" style="background:rgba(29,185,84,0.12);border:1px solid rgba(29,185,84,0.3);color:var(--green)">${g}</span>`
+  ).join("");
+  document.getElementById("cat-grid").innerHTML = ["new_artist","new_release","classic_fit"].map(cat => {
+    const count = discTracks.filter(t=>t.category===cat).length;
+    return `<div class="card cat-card" style="margin-bottom:0"><div class="cat-num" style="color:${CAT_COLORS[cat]}">${count}</div><div class="cat-lbl">${CAT_LABELS[cat]}</div></div>`;
+  }).join("");
+  renderTrackList();
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById("tab-disc").classList.toggle("active", tab==="discovery");
+  document.getElementById("tab-src").classList.toggle("active", tab==="source");
+  renderTrackList();
+}
+
+function renderTrackList() {
+  const el = document.getElementById("track-list");
+  if (activeTab === "source") {
+    el.innerHTML = sourceTracks.map((t,i) => `
+      <div class="track-row fade-in" style="animation-delay:${i*0.012}s">
+        <span class="track-num">${String(i+1).padStart(2,"0")}</span>
+        <div style="flex:1;min-width:0">
+          <div class="track-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div>
+          <div style="color:#3a3a3a;font-size:10px">${t.artists}</div>
+        </div>
+        <span class="track-year">${t.year}</span>
+      </div>`).join("");
+  } else {
+    el.innerHTML = discTracks.map((t,i) => `
+      <div class="track-row-disc fade-in" style="animation-delay:${i*0.012}s">
+        <span class="track-num" style="padding-top:2px">${String(i+1).padStart(2,"0")}</span>
+        <div style="flex:1">
+          <div class="track-name">${t.name}</div>
+          <div class="track-artist">${t.artist} · ${t.year}</div>
+          <span class="chip" style="background:${CAT_COLORS[t.category]}18;border:1px solid ${CAT_COLORS[t.category]}35;color:${CAT_COLORS[t.category]}">${CAT_LABELS[t.category]}</span>
+          <span class="chip-reason">${t.reason}</span>
+        </div>
+      </div>`).join("");
+  }
+}
+
+async function handleCreate() {
+  showView("creating");
+  setProgress("create-bar","create-pct",0);
+  try {
+    const me = await sfetch("https://api.spotify.com/v1/me");
+    setProgress("create-bar","create-pct",5);
+    const pl = await sfetch(`https://api.spotify.com/v1/users/${me.id}/playlists`, {
+      method: "POST",
+      body: JSON.stringify({ name: `${playlistName} Discovery`, description: `Discoveries based on ${playlistName} · Generated by Claude`, public: false }),
+    });
+    setProgress("create-bar","create-pct",10);
+    const uris = [];
+    for (let i = 0; i < discTracks.length; i++) {
+      const t = discTracks[i];
+      try {
+        const res = await sfetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(`track:${t.name} artist:${t.artist}`)}&type=track&limit=1`);
+        const found = res.tracks?.items?.[0];
+        if (found) uris.push(found.uri);
+      } catch {}
+      setProgress("create-bar","create-pct", Math.round(10 + ((i+1)/discTracks.length)*82));
+    }
+    for (let i = 0; i < uris.length; i += 100) {
+      await sfetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks`, {
+        method: "POST", body: JSON.stringify({ uris: uris.slice(i, i+100) }),
+      });
+    }
+    setProgress("create-bar","create-pct",100);
+    document.getElementById("done-name").textContent = playlistName + " Discovery";
+    document.getElementById("done-link").href = pl.external_urls?.spotify || `https://open.spotify.com/playlist/${pl.id}`;
+    showView("done");
+  } catch(e) { showError(e.message); }
+}
+
+function resetToHome() {
+  sourceTracks = []; discTracks = []; analysisData = null; playlistName = "";
+  showView("home");
+}
+
+function showError(msg) {
+  document.getElementById("error-msg").textContent = "✗ " + msg;
+  showView("error");
+}
+</script>
+</body>
+</html>
