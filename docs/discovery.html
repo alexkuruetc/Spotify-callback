@@ -291,8 +291,14 @@ window.addEventListener("load", () => {
     window.history.replaceState({}, "", window.location.pathname);
     if (error) { showError("Spotify declined: " + error); return; }
     if (!code) { showError("No auth code received."); return; }
-    // Verifier is hardcoded — just use it directly
-    codeVerifier = "L3z36UBXaRcDxoGOK~yeNQwOXY6~PF5HsL01nYpsLY_MbjvhF7vE6QInG2jTqBXFALmyA-NTIVk5jZ2O6MwsV78akkdKWkxMxXz8NXn2-D3Kfrnr._3w62VEeSqOO~a_";
+    // Read verifier and state from localStorage — written before the redirect
+    const savedVerifier = localStorage.getItem("spotify_verifier");
+    const savedState = localStorage.getItem("spotify_state");
+    localStorage.removeItem("spotify_verifier");
+    localStorage.removeItem("spotify_state");
+    if (!savedVerifier) { showError("Session expired — please try connecting again."); return; }
+    if (state && savedState && state !== savedState) { showError("State mismatch — please try again."); return; }
+    codeVerifier = savedVerifier;
     doExchange(code);
   } else {
     showView("idle");
@@ -315,13 +321,16 @@ async function generateChallenge(verifier) {
 }
 
 async function buildAuthUrl() {
-  // Hardcoded PKCE pair — verifier never needs to travel through URLs
-  codeVerifier = "L3z36UBXaRcDxoGOK~yeNQwOXY6~PF5HsL01nYpsLY_MbjvhF7vE6QInG2jTqBXFALmyA-NTIVk5jZ2O6MwsV78akkdKWkxMxXz8NXn2-D3Kfrnr._3w62VEeSqOO~a_";
+  const verifier = generateVerifier();
+  const challenge = await generateChallenge(verifier);
   const state = crypto.randomUUID();
+  // Store verifier in localStorage — it survives the redirect since we return to the same origin
+  localStorage.setItem("spotify_verifier", verifier);
+  localStorage.setItem("spotify_state", state);
   const params = new URLSearchParams({
     client_id: CLIENT_ID, response_type: "code",
     redirect_uri: REDIRECT_URI, code_challenge_method: "S256",
-    code_challenge: "aDPt0OqCRnt8lJl2owGWySCfGbKfncYijUgpynGY2QM", state, scope: SCOPES,
+    code_challenge: challenge, state, scope: SCOPES,
     show_dialog: "true",
   });
   window.location.href = `https://accounts.spotify.com/authorize?${params}`;
