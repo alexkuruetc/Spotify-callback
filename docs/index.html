@@ -4,26 +4,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body style="font-family:monospace;padding:30px;background:#0d0d0d;color:#e8e8e8;">
+<p>Connecting... returning to app.</p>
 <script>
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
   const error = params.get("error");
-  const state = params.get("state");
+  const state = params.get("state") || "";
 
   if (error) {
-    document.write('<p style="color:#ff5555">✗ Spotify declined: ' + error + '</p>');
+    document.querySelector("p").style.color = "#ff5555";
+    document.querySelector("p").textContent = "✗ Spotify declined: " + error;
   } else if (code && state) {
-    // State contains the return URL encoded in it after a pipe character
+    // Return URL is encoded in state after the pipe character
     const pipeIdx = state.lastIndexOf("|");
-    const returnUrl = pipeIdx > -1 ? atob(state.slice(pipeIdx + 1)) : null;
-    if (returnUrl) {
-      const redirect = returnUrl + "?spotifycallback=1&code=" + encodeURIComponent(code) + "&state=" + encodeURIComponent(state);
-      window.location.replace(redirect);
+    if (pipeIdx > -1) {
+      try {
+        const returnUrl = atob(state.slice(pipeIdx + 1).split("|")[0]);
+        // returnUrl is actually the verifier — the return URL is always discovery.html
+        const discoveryUrl = window.location.origin + window.location.pathname.replace("index.html","").replace(/\/$/, "") + "/../discovery.html";
+        const redirect = "https://alexkuruetc.github.io/Spotify-callback/discovery.html?spotifycallback=1&code=" + encodeURIComponent(code) + "&state=" + encodeURIComponent(state);
+        window.location.replace(redirect);
+      } catch(e) {
+        document.querySelector("p").style.color = "#ff5555";
+        document.querySelector("p").textContent = "✗ Error processing callback: " + e.message;
+      }
     } else {
-      document.write('<p style="color:#ff5555">No return URL found. Please go back and try again.</p>');
+      document.querySelector("p").style.color = "#ff5555";
+      document.querySelector("p").textContent = "✗ Invalid state parameter.";
     }
   } else {
-    document.write('<p>No code found. Please go back and try again.</p>');
+    document.querySelector("p").textContent = "No code found. Please go back and try again.";
   }
 </script>
 </body>
