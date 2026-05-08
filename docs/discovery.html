@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -90,15 +91,61 @@
   <div class="logo"><span>\m/</span> DISCOVERY</div>
   <div class="sub">Spotify · Playlist Intelligence · Claude AI</div>
 
+  <!-- AUTH: IDLE -->
+
   <div id="view-idle" class="card">
     <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:0.05em;color:#ccc;margin-bottom:10px">Connect your Spotify account</div>
-    <div style="color:#444;font-size:11px;line-height:1.8;margin-bottom:20px">Tap below to begin. You'll be taken to Spotify to log in, then brought straight back.</div>
+    <div style="color:#444;font-size:11px;line-height:1.8;margin-bottom:20px">
+      Tap below to generate your secure login link, then follow the 3 steps.
+    </div>
     <button class="btn" onclick="buildAuthUrl()">▶ Connect Spotify</button>
   </div>
+
+  <!-- AUTH: LINK -->
+
+  <div id="view-link" class="card hidden">
+    <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:0.05em;color:#ccc;margin-bottom:20px">Connect Spotify — 3 steps</div>
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div>
+        <div style="color:#bbb;font-size:12px;margin-bottom:10px">Tap to open Spotify login</div>
+        <a id="spotify-link" class="btn" href="#" target="_blank" rel="noreferrer">Open Spotify Login ↗</a>
+        <div style="color:#333;font-size:10px;margin-top:8px">Log in and tap Agree on the permissions screen</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div style="color:#555;font-size:12px;line-height:1.7">
+        You'll land on a page showing your auth code.<br>Tap <strong style="color:#888">Copy Code</strong> on that page.
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div style="color:#555;font-size:12px;line-height:1.7">Come back here and paste your code below.</div>
+    </div>
+    <button class="btn" style="margin-top:20px" onclick="showView('paste')">I have my code →</button>
+  </div>
+
+  <!-- AUTH: PASTE -->
+
+  <div id="view-paste" class="card hidden">
+    <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:0.05em;color:#ccc;margin-bottom:14px">Paste your auth code</div>
+    <div style="color:#555;font-size:11px;line-height:1.7;margin-bottom:16px">Paste the code you copied from the Spotify callback page.</div>
+    <div id="paste-error" class="error-box hidden"></div>
+    <textarea id="code-input" placeholder="AQC8x..." rows="3"></textarea>
+    <div class="btn-row">
+      <button class="btn" onclick="exchangeCode()">✓ Connect</button>
+      <button class="btn btn-ghost" onclick="showView('link')">← Back</button>
+    </div>
+  </div>
+
+  <!-- AUTH: EXCHANGING -->
 
   <div id="view-exchanging" class="card hidden">
     <div class="blink" style="color:var(--green);font-size:11px">◉ Connecting to Spotify...</div>
   </div>
+
+  <!-- HOME -->
 
   <div id="view-home" class="hidden">
     <div class="card card-green" style="margin-bottom:14px">
@@ -116,6 +163,8 @@
     </div>
   </div>
 
+  <!-- FETCHING -->
+
   <div id="view-fetching" class="card hidden">
     <div class="blink" style="color:#444;font-size:11px;margin-bottom:20px">◉ Fetching playlist from Spotify...</div>
     <div class="progress-wrap">
@@ -124,6 +173,8 @@
     </div>
     <div id="fetch-count" style="color:#2a2a2a;font-size:10px"></div>
   </div>
+
+  <!-- ANALYSING -->
 
   <div id="view-analysing" class="card hidden">
     <div class="blink" style="color:#444;font-size:11px;margin-bottom:20px">◉ Claude is analysing your taste...</div>
@@ -137,6 +188,8 @@
     </div>
     <div id="analyse-hint" style="color:#222;font-size:10px;margin-top:10px"></div>
   </div>
+
+  <!-- PREVIEW -->
 
   <div id="view-preview" class="hidden">
     <div class="card">
@@ -166,6 +219,8 @@
     </div>
   </div>
 
+  <!-- CREATING -->
+
   <div id="view-creating" class="card hidden">
     <div class="blink" style="color:#444;font-size:11px;margin-bottom:20px">◉ Building your playlist on Spotify...</div>
     <div class="progress-wrap">
@@ -174,6 +229,8 @@
     </div>
     <div style="color:#222;font-size:10px;margin-top:10px">Searching Spotify for each track · ~30 seconds</div>
   </div>
+
+  <!-- DONE -->
 
   <div id="view-done" class="card hidden">
     <div class="done-emoji">🤘</div>
@@ -185,9 +242,13 @@
     </div>
   </div>
 
+  <!-- ERROR -->
+
   <div id="view-error" class="card card-red hidden">
     <div id="error-msg" style="color:#ff5555;font-size:12px;margin-bottom:10px"></div>
-    <div style="color:#333;font-size:11px;margin-bottom:20px;line-height:1.7">If this is an auth error, reconnect Spotify. Tokens expire after 1 hour.</div>
+    <div style="color:#333;font-size:11px;margin-bottom:20px;line-height:1.7">
+      If this is an auth error, reconnect Spotify. Tokens expire after 1 hour.
+    </div>
     <div class="btn-row" style="margin-top:0">
       <button class="btn btn-ghost" onclick="resetToHome()">← Back</button>
       <button class="btn btn-danger" onclick="disconnect()">Reconnect Spotify</button>
@@ -199,6 +260,7 @@
 const CLIENT_ID = "8e569fd4f15f4533b93c03fe1afc02a8";
 const REDIRECT_URI = "https://alexkuruetc.github.io/Spotify-callback/";
 const SCOPES = "playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public";
+const DEFAULT_PLAYLIST = "https://open.spotify.com/playlist/53cq9nPEapUIgWgYTsa7Uo";
 
 let accessToken = null;
 let codeVerifier = null;
@@ -211,7 +273,7 @@ let analysisData = null;
 const CAT_COLORS = { new_artist: "#1db954", new_release: "#ff6b35", classic_fit: "#a78bfa" };
 const CAT_LABELS = { new_artist: "NEW ARTIST", new_release: "NEW RELEASE", classic_fit: "CLASSIC FIT" };
 
-const VIEWS = ["idle","exchanging","home","fetching","analysing","preview","creating","done","error"];
+const VIEWS = ["idle","link","paste","exchanging","home","fetching","analysing","preview","creating","done","error"];
 function showView(name) {
   VIEWS.forEach(v => {
     const el = document.getElementById("view-" + v);
@@ -219,27 +281,28 @@ function showView(name) {
   });
 }
 
+// ── On load: check if returning from Spotify callback ───────────────────────
 window.addEventListener("load", () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get("spotifycallback") === "1") {
     const code = params.get("code");
-    const state = params.get("state");
+    const state = params.get("state") || "";
     const error = params.get("error");
-    const savedState = sessionStorage.getItem("spotify_state");
-    const verifier = sessionStorage.getItem("spotify_verifier");
-    sessionStorage.removeItem("spotify_state");
-    sessionStorage.removeItem("spotify_verifier");
     window.history.replaceState({}, "", window.location.pathname);
     if (error) { showError("Spotify declined: " + error); return; }
     if (!code) { showError("No auth code received."); return; }
-    if (state !== savedState) { showError("State mismatch — please try again."); return; }
-    codeVerifier = verifier;
+    // Verifier is encoded in state after the pipe character
+    const pipeIdx = state.lastIndexOf("|");
+    if (pipeIdx === -1) { showError("Missing verifier — please try again."); return; }
+    try { codeVerifier = atob(state.slice(pipeIdx + 1)); }
+    catch(e) { showError("Could not decode verifier — please try again."); return; }
     doExchange(code);
   } else {
     showView("idle");
   }
 });
 
+// ── PKCE helpers ─────────────────────────────────────────────────────────────
 function generateVerifier(len = 128) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
   const arr = new Uint8Array(len);
@@ -258,16 +321,22 @@ async function buildAuthUrl() {
   const verifier = generateVerifier();
   codeVerifier = verifier;
   const challenge = await generateChallenge(verifier);
-  const state = crypto.randomUUID();
-  sessionStorage.setItem("spotify_verifier", verifier);
-  sessionStorage.setItem("spotify_state", state);
-  sessionStorage.setItem("spotify_return_url", window.location.href.split("?")[0]);
+  // Encode verifier into state so it survives the redirect (no sessionStorage needed)
+  const stateBase = crypto.randomUUID();
+  const state = stateBase + "|" + btoa(verifier);
   const params = new URLSearchParams({
     client_id: CLIENT_ID, response_type: "code",
     redirect_uri: REDIRECT_URI, code_challenge_method: "S256",
     code_challenge: challenge, state, scope: SCOPES,
+    show_dialog: "true",
   });
   window.location.href = `https://accounts.spotify.com/authorize?${params}`;
+}
+
+async function exchangeCode() {
+  const code = document.getElementById("code-input").value.trim();
+  if (!code) return;
+  await doExchange(code);
 }
 
 async function doExchange(code) {
@@ -285,18 +354,22 @@ async function doExchange(code) {
       accessToken = data.access_token;
       showView("home");
     } else {
-      throw new Error(data.error_description || "Token exchange failed — please try again.");
+      throw new Error(data.error_description || "Token exchange failed — code may have expired. Please start again.");
     }
   } catch(e) {
-    showError(e.message);
+    document.getElementById("paste-error").textContent = "✗ " + e.message;
+    document.getElementById("paste-error").classList.remove("hidden");
+    showView("paste");
   }
 }
 
 function disconnect() {
   accessToken = null; sourceTracks = []; discTracks = []; playlistName = "";
+  document.getElementById("code-input").value = "";
   showView("idle");
 }
 
+// ── Spotify API helper ───────────────────────────────────────────────────────
 async function sfetch(url, opts = {}) {
   const res = await fetch(url, {
     ...opts,
@@ -323,21 +396,27 @@ function extractPlaylistId(input) {
   return null;
 }
 
+// ── Run ──────────────────────────────────────────────────────────────────────
 async function handleRun() {
   const input = document.getElementById("playlist-url").value.trim();
   const pid = extractPlaylistId(input);
   if (!pid) { showError("Invalid playlist URL or ID."); return; }
+
   sourceTracks = []; discTracks = []; analysisData = null;
   showView("fetching");
   setProgress("fetch-bar","fetch-pct",0);
+
   try {
     const meta = await sfetch(`https://api.spotify.com/v1/playlists/${pid}?fields=name`);
     playlistName = meta.name;
+
+    // Fetch all tracks paginated
     let url = `https://api.spotify.com/v1/playlists/${pid}/tracks?limit=100&fields=next,items(track(id,name,artists,album(release_date)))`;
     while (url) {
       const data = await sfetch(url);
       const valid = (data.items||[]).filter(i=>i.track?.id).map(i=>({
-        id: i.track.id, name: i.track.name,
+        id: i.track.id,
+        name: i.track.name,
         artists: i.track.artists.map(a=>a.name).join(", "),
         year: i.track.album?.release_date?.slice(0,4)||"?",
       }));
@@ -347,16 +426,21 @@ async function handleRun() {
       document.getElementById("fetch-count").textContent = sourceTracks.length + " tracks loaded";
     }
     setProgress("fetch-bar","fetch-pct",100);
+
+    // Analyse with Claude
     showView("analysing");
     setProgress("analyse-bar","analyse-pct",10);
     document.getElementById("analyse-hint").textContent = sourceTracks.length + " tracks · detecting genres · finding new artists";
+
     const artists = [...new Set(sourceTracks.map(t=>t.artists))].join(", ");
     const sample = sourceTracks.slice(0,100).map(t=>`${t.name} — ${t.artists} (${t.year})`).join("\n");
+
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514", max_tokens: 1000,
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
         system: `You are a music expert specialising in metal, rock, and heavy music. Analyse a playlist and return ONLY raw JSON — no markdown fences, no preamble, no explanation.
 
 Schema (strict):
@@ -381,18 +465,24 @@ Vary subgenres within heavy music. Be bold and specific — not obvious safe cho
         messages: [{ role: "user", content: `Playlist: "${playlistName}" (${sourceTracks.length} tracks)\nArtists: ${artists}\n\nSample:\n${sample}` }],
       }),
     });
+
     setProgress("analyse-bar","analyse-pct",70);
     const cd = await claudeRes.json();
     const raw = cd.content?.find(b=>b.type==="text")?.text || "{}";
     let parsed;
     try { parsed = JSON.parse(raw.replace(/```json|```/g,"").trim()); }
     catch { throw new Error("Failed to parse Claude response — please try again."); }
+
     analysisData = parsed;
     discTracks = parsed.recommendations || [];
     setProgress("analyse-bar","analyse-pct",100);
+
     renderPreview();
     showView("preview");
-  } catch(e) { showError(e.message); }
+
+  } catch(e) {
+    showError(e.message);
+  }
 }
 
 function renderPreview() {
@@ -400,13 +490,21 @@ function renderPreview() {
   document.getElementById("preview-count").textContent = sourceTracks.length + " tracks";
   document.getElementById("preview-mood").textContent = analysisData.mood || "";
   document.getElementById("create-btn").textContent = `✦ Create "${playlistName} Discovery"`;
-  document.getElementById("preview-genres").innerHTML = (analysisData.genres||[]).map(g =>
+
+  const genreEl = document.getElementById("preview-genres");
+  genreEl.innerHTML = (analysisData.genres||[]).map(g =>
     `<span class="chip" style="background:rgba(29,185,84,0.12);border:1px solid rgba(29,185,84,0.3);color:var(--green)">${g}</span>`
   ).join("");
-  document.getElementById("cat-grid").innerHTML = ["new_artist","new_release","classic_fit"].map(cat => {
+
+  const catGrid = document.getElementById("cat-grid");
+  catGrid.innerHTML = ["new_artist","new_release","classic_fit"].map(cat => {
     const count = discTracks.filter(t=>t.category===cat).length;
-    return `<div class="card cat-card" style="margin-bottom:0"><div class="cat-num" style="color:${CAT_COLORS[cat]}">${count}</div><div class="cat-lbl">${CAT_LABELS[cat]}</div></div>`;
+    return `<div class="card cat-card" style="margin-bottom:0">
+      <div class="cat-num" style="color:${CAT_COLORS[cat]}">${count}</div>
+      <div class="cat-lbl">${CAT_LABELS[cat]}</div>
+    </div>`;
   }).join("");
+
   renderTrackList();
 }
 
@@ -443,17 +541,24 @@ function renderTrackList() {
   }
 }
 
+// ── Create playlist ──────────────────────────────────────────────────────────
 async function handleCreate() {
   showView("creating");
   setProgress("create-bar","create-pct",0);
   try {
     const me = await sfetch("https://api.spotify.com/v1/me");
     setProgress("create-bar","create-pct",5);
+
     const pl = await sfetch(`https://api.spotify.com/v1/users/${me.id}/playlists`, {
       method: "POST",
-      body: JSON.stringify({ name: `${playlistName} Discovery`, description: `Discoveries based on ${playlistName} · Generated by Claude`, public: false }),
+      body: JSON.stringify({
+        name: `${playlistName} Discovery`,
+        description: `Discoveries based on ${playlistName} · Generated by Claude`,
+        public: false,
+      }),
     });
     setProgress("create-bar","create-pct",10);
+
     const uris = [];
     for (let i = 0; i < discTracks.length; i++) {
       const t = discTracks[i];
@@ -464,16 +569,22 @@ async function handleCreate() {
       } catch {}
       setProgress("create-bar","create-pct", Math.round(10 + ((i+1)/discTracks.length)*82));
     }
+
     for (let i = 0; i < uris.length; i += 100) {
       await sfetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks`, {
-        method: "POST", body: JSON.stringify({ uris: uris.slice(i, i+100) }),
+        method: "POST",
+        body: JSON.stringify({ uris: uris.slice(i, i+100) }),
       });
     }
+
     setProgress("create-bar","create-pct",100);
     document.getElementById("done-name").textContent = playlistName + " Discovery";
     document.getElementById("done-link").href = pl.external_urls?.spotify || `https://open.spotify.com/playlist/${pl.id}`;
     showView("done");
-  } catch(e) { showError(e.message); }
+
+  } catch(e) {
+    showError(e.message);
+  }
 }
 
 function resetToHome() {
@@ -486,5 +597,6 @@ function showError(msg) {
   showView("error");
 }
 </script>
+
 </body>
 </html>
