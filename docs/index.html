@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Spotify Auth</title></head>
+<body>
+<p style="font-family:monospace;padding:20px">Authorised ✓ You can close this tab and return to Claude.</p>
+<script>
+  if (window.opener) {
+    window.opener.postMessage(window.location.href, "*");
+    setTimeout(() => window.close(), 1000);
+  }
+</script>
+</body>
+</html>
