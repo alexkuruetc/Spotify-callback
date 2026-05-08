@@ -271,8 +271,28 @@ async function doExchange(code, verifier) {
     });
     const data = await res.json();
     if (data.access_token) {
-      accessToken = data.access_token;
-      showView("home");
+      // Show token for copying into the Claude artifact
+      document.body.innerHTML = `
+        <div style="background:#0d0d0d;color:#e8e8e8;font-family:'DM Mono',monospace;padding:40px 24px;min-height:100vh">
+          <div style="max-width:600px;margin:0 auto">
+            <div style="font-family:'Bebas Neue',cursive;font-size:48px;color:#1db954;margin-bottom:8px">\m/ DISCOVERY</div>
+            <div style="color:#333;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:40px">Spotify Connected</div>
+            <div style="background:rgba(29,185,84,0.08);border:1px solid rgba(29,185,84,0.2);border-radius:6px;padding:24px;margin-bottom:16px">
+              <div style="color:#444;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px">Your Spotify Access Token</div>
+              <div style="background:rgba(0,0,0,0.3);border-radius:4px;padding:12px;word-break:break-all;font-size:11px;color:#888;margin-bottom:16px;line-height:1.6">${data.access_token}</div>
+              <button onclick="navigator.clipboard.writeText('${data.access_token}').then(()=>{this.textContent='✓ Copied!';this.style.background='#17a349';})"
+                style="padding:11px 24px;background:#1db954;color:#000;border:none;border-radius:4px;font-family:'DM Mono',monospace;font-weight:700;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">
+                Copy Token
+              </button>
+            </div>
+            <div style="color:#444;font-size:11px;line-height:1.8">
+              1. Tap <strong style="color:#888">Copy Token</strong> above<br>
+              2. Switch back to Claude<br>
+              3. Paste the token into the app<br>
+              <span style="color:#333">Token expires in 1 hour</span>
+            </div>
+          </div>
+        </div>`;
     } else {
       throw new Error(data.error_description || data.error || "Status " + res.status);
     }
