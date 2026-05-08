@@ -4,10 +4,15 @@
 <body>
 <p style="font-family:monospace;padding:20px">Authorised ✓ You can close this tab and return to Claude.</p>
 <script>
+  const url = window.location.href;
+  // Try postMessage to opener
   if (window.opener) {
-    window.opener.postMessage(window.location.href, "*");
-    setTimeout(() => window.close(), 1000);
+    try { window.opener.postMessage(url, "*"); } catch(e) {}
   }
+  // Also write to localStorage as fallback
+  try { localStorage.setItem("spotify_callback_url", url); } catch(e) {}
+  setTimeout(() => window.close(), 2000);
 </script>
 </body>
 </html>
+
