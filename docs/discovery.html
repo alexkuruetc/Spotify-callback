@@ -283,18 +283,32 @@ function showView(name) {
 
 // ── On load: check if returning from Spotify callback ───────────────────────
 window.addEventListener("load", () => {
-  const params = new URLSearchParams(window.location.search);
+  // Show raw URL for debugging
+  console.log("PAGE LOAD URL:", window.location.href);
+
+  // Check both search params and hash (in case GitHub Pages moves them)
+  let search = window.location.search;
+  if (!search && window.location.hash && window.location.hash.includes("code=")) {
+    search = "?" + window.location.hash.slice(1);
+  }
+  const params = new URLSearchParams(search);
   const code = params.get("code");
   const state = params.get("state") || "";
   const error = params.get("error");
 
+  // Always show what URL we loaded with
+  document.title = "url:" + window.location.href.slice(-60);
+
+  // Always show the raw URL on screen so we can debug
+  const rawUrl = window.location.href;
+  const urlDisplay = '<div style="position:fixed;bottom:0;left:0;right:0;background:#111;color:#1db954;font-size:9px;padding:8px;word-break:break-all;z-index:9999;border-top:1px solid #333">' + rawUrl + '</div>';
+  document.body.innerHTML += urlDisplay;
+
   if (code || error) {
-    // Returning from Spotify redirect
-    window.history.replaceState({}, "", window.location.pathname);
+    // DO NOT replaceState — keep URL visible for debugging
     if (error) { showError("Spotify declined: " + error); return; }
     const savedVerifier = localStorage.getItem("spotify_verifier");
     const savedState = localStorage.getItem("spotify_state");
-    // Debug: show what we got
     const debugMsg = "code=" + (code ? code.slice(0,8)+"..." : "MISSING")
       + " | verifier=" + (savedVerifier ? savedVerifier.slice(0,8)+"..." : "MISSING")
       + " | state_match=" + (state === savedState ? "YES" : "NO");
@@ -350,25 +364,32 @@ async function exchangeCode() {
 
 async function doExchange(code) {
   showView("exchanging");
+  const debugEl = document.getElementById("view-exchanging");
   try {
     const body = new URLSearchParams({
       client_id: CLIENT_ID, grant_type: "authorization_code",
       code, redirect_uri: REDIRECT_URI, code_verifier: codeVerifier,
     });
+    debugEl.innerHTML += '<div style="color:#555;font-size:9px;margin-top:8px;word-break:break-all;line-height:1.6">'
+      + 'redirect_uri: ' + REDIRECT_URI + '<br>'
+      + 'code: ' + code.slice(0,16) + '...<br>'
+      + 'verifier: ' + (codeVerifier ? codeVerifier.slice(0,16) + '...' : 'MISSING')
+      + '</div>';
     const res = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body,
     });
     const data = await res.json();
+    debugEl.innerHTML += '<div style="color:#555;font-size:9px;margin-top:4px;word-break:break-all">'
+      + 'status: ' + res.status + ' | ' + JSON.stringify(data)
+      + '</div>';
     if (data.access_token) {
       accessToken = data.access_token;
       showView("home");
     } else {
-      throw new Error(data.error_description || "Token exchange failed — code may have expired. Please start again.");
+      throw new Error(data.error_description || data.error || "status " + res.status);
     }
   } catch(e) {
-    document.getElementById("paste-error").textContent = "✗ " + e.message;
-    document.getElementById("paste-error").classList.remove("hidden");
-    showView("paste");
+    showError("Exchange failed: " + e.message);
   }
 }
 
