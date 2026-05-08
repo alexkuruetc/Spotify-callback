@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -292,11 +291,8 @@ window.addEventListener("load", () => {
     window.history.replaceState({}, "", window.location.pathname);
     if (error) { showError("Spotify declined: " + error); return; }
     if (!code) { showError("No auth code received."); return; }
-    // Verifier is encoded in state after the pipe character: "UUID|base64(verifier)"
-    const pipeIdx = state.lastIndexOf("|");
-    if (pipeIdx === -1) { showError("Missing verifier — please try again."); return; }
-    try { codeVerifier = decodeURIComponent(escape(atob(state.slice(pipeIdx + 1)))); }
-    catch(e) { showError("Could not decode verifier — please try again."); return; }
+    // Verifier is hardcoded — just use it directly
+    codeVerifier = "L3z36UBXaRcDxoGOK~yeNQwOXY6~PF5HsL01nYpsLY_MbjvhF7vE6QInG2jTqBXFALmyA-NTIVk5jZ2O6MwsV78akkdKWkxMxXz8NXn2-D3Kfrnr._3w62VEeSqOO~a_";
     doExchange(code);
   } else {
     showView("idle");
@@ -319,16 +315,13 @@ async function generateChallenge(verifier) {
 }
 
 async function buildAuthUrl() {
-  const verifier = generateVerifier();
-  codeVerifier = verifier;
-  const challenge = await generateChallenge(verifier);
-  // Encode verifier into state using btoa — survives full redirect, no sessionStorage needed
-  // State format: "UUID|base64(verifier)"
-  const state = crypto.randomUUID() + "|" + btoa(unescape(encodeURIComponent(verifier)));
+  // Hardcoded PKCE pair — verifier never needs to travel through URLs
+  codeVerifier = "L3z36UBXaRcDxoGOK~yeNQwOXY6~PF5HsL01nYpsLY_MbjvhF7vE6QInG2jTqBXFALmyA-NTIVk5jZ2O6MwsV78akkdKWkxMxXz8NXn2-D3Kfrnr._3w62VEeSqOO~a_";
+  const state = crypto.randomUUID();
   const params = new URLSearchParams({
     client_id: CLIENT_ID, response_type: "code",
     redirect_uri: REDIRECT_URI, code_challenge_method: "S256",
-    code_challenge: challenge, state, scope: SCOPES,
+    code_challenge: "aDPt0OqCRnt8lJl2owGWySCfGbKfncYijUgpynGY2QM", state, scope: SCOPES,
     show_dialog: "true",
   });
   window.location.href = `https://accounts.spotify.com/authorize?${params}`;
