@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Spotify Auth</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<head><title>Spotify Auth</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body style="font-family:monospace;padding:30px;background:#0d0d0d;color:#e8e8e8;">
 <script>
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
   const error = params.get("error");
+  const state = params.get("state");
+
   if (error) {
     document.write('<p style="color:#ff5555">✗ Spotify declined: ' + error + '</p>');
-  } else if (code) {
-    document.write(
-      '<p style="color:#1db954;font-size:14px;margin-bottom:16px">✓ Authorised! Copy the code below and paste it into the app:</p>' +
-      '<div style="background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:16px;word-break:break-all;font-size:13px;color:#fff;margin-bottom:16px">' + code + '</div>' +
-      '<button onclick="navigator.clipboard.writeText(\'' + code + '\').then(()=>this.textContent=\'Copied!\')" ' +
-      'style="background:#1db954;color:#000;border:none;padding:10px 20px;border-radius:4px;font-family:monospace;font-weight:bold;font-size:12px;cursor:pointer">Copy Code</button>'
-    );
+  } else if (code && state) {
+    // State contains the return URL encoded in it after a pipe character
+    const pipeIdx = state.lastIndexOf("|");
+    const returnUrl = pipeIdx > -1 ? atob(state.slice(pipeIdx + 1)) : null;
+    if (returnUrl) {
+      const redirect = returnUrl + "?spotifycallback=1&code=" + encodeURIComponent(code) + "&state=" + encodeURIComponent(state);
+      window.location.replace(redirect);
+    } else {
+      document.write('<p style="color:#ff5555">No return URL found. Please go back and try again.</p>');
+    }
   } else {
     document.write('<p>No code found. Please go back and try again.</p>');
   }
