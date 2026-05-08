@@ -324,14 +324,17 @@ async function handleRun() {
   try {
     const meta = await sfetch("https://api.spotify.com/v1/playlists/" + pid + "?fields=name");
     playlistName = meta.name;
-    let url = "https://api.spotify.com/v1/playlists/" + pid + "/tracks?limit=100&market=AU";
+    let url = "https://api.spotify.com/v1/playlists/" + pid + "/items?limit=100&market=AU";
     while (url) {
       const data = await sfetch(url);
-      const valid = (data.items||[]).filter(i=>i.track?.id).map(i=>({
-        id: i.track.id, name: i.track.name,
-        artists: i.track.artists.map(a=>a.name).join(", "),
-        year: i.track.album?.release_date?.slice(0,4)||"?",
-      }));
+      const valid = (data.items||[]).filter(i=>(i.track||i.item)?.id).map(i=>{
+        const t = i.track || i.item;
+        return {
+          id: t.id, name: t.name,
+          artists: t.artists.map(a=>a.name).join(", "),
+          year: t.album?.release_date?.slice(0,4)||"?",
+        };
+      });
       sourceTracks = [...sourceTracks, ...valid];
       url = data.next || null;
       setProgress("fetch-bar","fetch-pct", Math.min(90, sourceTracks.length));
