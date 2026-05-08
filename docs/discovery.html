@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -291,10 +292,10 @@ window.addEventListener("load", () => {
     window.history.replaceState({}, "", window.location.pathname);
     if (error) { showError("Spotify declined: " + error); return; }
     if (!code) { showError("No auth code received."); return; }
-    // Verifier is encoded in state after the pipe character
+    // Verifier is encoded in state after the pipe character: "UUID|base64(verifier)"
     const pipeIdx = state.lastIndexOf("|");
     if (pipeIdx === -1) { showError("Missing verifier — please try again."); return; }
-    try { codeVerifier = atob(state.slice(pipeIdx + 1)); }
+    try { codeVerifier = decodeURIComponent(escape(atob(state.slice(pipeIdx + 1)))); }
     catch(e) { showError("Could not decode verifier — please try again."); return; }
     doExchange(code);
   } else {
@@ -321,9 +322,9 @@ async function buildAuthUrl() {
   const verifier = generateVerifier();
   codeVerifier = verifier;
   const challenge = await generateChallenge(verifier);
-  // Encode verifier into state so it survives the redirect (no sessionStorage needed)
-  const stateBase = crypto.randomUUID();
-  const state = stateBase + "|" + btoa(verifier);
+  // Encode verifier into state using btoa — survives full redirect, no sessionStorage needed
+  // State format: "UUID|base64(verifier)"
+  const state = crypto.randomUUID() + "|" + btoa(unescape(encodeURIComponent(verifier)));
   const params = new URLSearchParams({
     client_id: CLIENT_ID, response_type: "code",
     redirect_uri: REDIRECT_URI, code_challenge_method: "S256",
