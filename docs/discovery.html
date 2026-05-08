@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -325,7 +324,7 @@ async function handleRun() {
   try {
     const meta = await sfetch("https://api.spotify.com/v1/playlists/" + pid + "?fields=name");
     playlistName = meta.name;
-    let url = "https://api.spotify.com/v1/playlists/" + pid + "/tracks?limit=100&fields=next,items(track(id,name,artists,album(release_date)))";
+    let url = "https://api.spotify.com/v1/playlists/" + pid + "/tracks?limit=100";
     while (url) {
       const data = await sfetch(url);
       const valid = (data.items||[]).filter(i=>i.track?.id).map(i=>({
@@ -475,6 +474,5 @@ function showError(msg) {
   showView("error");
 }
 </script>
-
 </body>
 </html>
